@@ -29,10 +29,25 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = "__all__"
 
-
     def create(self,validated_data):
         user =  self.context['request'].user
-        if user.has_perm('DaanpatraApp.can_add_drivers'):
+        role = validated_data.get('role')
+        if role == 'Sub_Admin':
+            if user.has_perm('DaanpatraApp.can_add_sub_admin'):
+                user = User.objects.create(
+                    email = validated_data.get('email'),
+                    username = validated_data.get('username'),
+                    password = validated_data.get('password'),
+                    name = validated_data.get('name'),
+                    birth_date = validated_data.get('birth_date'),
+                    role=role
+                )
+                user.set_password(validated_data.get('password'))
+                user.save()
+                return user
+            else:
+                raise PermissionDenied()
+        else:
             user = User.objects.create(
                 email = validated_data.get('email'),
                 username = validated_data.get('username'),
@@ -41,14 +56,27 @@ class UserSerializer(serializers.ModelSerializer):
                 birth_date = validated_data.get('birth_date'),
             )
             user.set_password(validated_data.get('password'))
-            delete_perm = Permission.objects.get(codename='delete_user')
-            view_perm = Permission.objects.get(codename='view_user')
-            update_perm = Permission.objects.get(codename='change_user')
-            user.user_permissions.add(view_perm, update_perm, delete_perm)
             user.save()
             return user
-        else:
-            raise PermissionDenied()
+
+
+        # if user.has_perm('DaanpatraApp.can_add_drivers'):
+        #     user = User.objects.create(
+        #         email = validated_data.get('email'),
+        #         username = validated_data.get('username'),
+        #         password = validated_data.get('password'),
+        #         name = validated_data.get('name'),
+        #         birth_date = validated_data.get('birth_date'),
+        #     )
+        #     user.set_password(validated_data.get('password'))
+        #     delete_perm = Permission.objects.get(codename='delete_user')
+        #     view_perm = Permission.objects.get(codename='view_user')
+        #     update_perm = Permission.objects.get(codename='change_user')
+        #     user.user_permissions.add(view_perm, update_perm, delete_perm)
+        #     user.save()
+        #     return user
+        # else:
+        #     raise PermissionDenied()
 
 
 class LoginSerializer(serializers.ModelSerializer):

@@ -31,6 +31,9 @@ class User(AbstractUser):
 
     class Meta:
         permissions = ( 
+            ("can_add_sub_admin", "Access to add Sub Admin"),
+            ("can_update_sub_admin", "Access to update Sub Admin"),
+            ("can_remove_sub_admin", "Access to remove Sub Admin"),
             ("can_add_drivers", "Access to add Drivers"), 
             ("can_remove_drivers", "Access to remove Drivers"),
             ("can_update_drivers", "Access to update Drivers"),

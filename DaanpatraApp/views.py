@@ -74,7 +74,10 @@ class Login(GenericAPIView):
             'Permissions':user.get_all_permissions(),
             
         }
-        return Response({'Data':response.json(),'User':user_details})
+        if user_details:
+            return Response({'Data':response.json(),'User':user_details,"Message":"login successfull."},status=200)
+        return Response({'Message':"Incorrect credentials."},status=404)
+
 
 
 class DriverActionsViewset(viewsets.ModelViewSet):
@@ -170,22 +173,20 @@ class TestViewSet(viewsets.ModelViewSet):
     serializer_class = TestSerializer
 
     def list(self, request):
-        x = print(self.request.user.uuid)
-        y = User.objects.filter(uuid=x)
-        print(y)
-        for x in y:
-            print(x.profile)
+        user_image = self.request.user.profile
+        first_name = self.request.user.first_name
+        last_name = self.request.user.last_name
+        user_name = first_name + " " +last_name
         from PIL import Image, ImageDraw, ImageFont
         import pandas as pd
-        pro = Image.open("/home/harsh/Pictures/test.png") #25x25
+        pro = Image.open('/home/harsh/Projects/Daanpatra/media/' + str(user_image)) #25x25
         profile = pro.resize((1200,1500))
-        name_list = ['Harsh Malviya','Jhonny Depp']
-        for i in name_list:
-            im = Image.open("/home/harsh/Certificate/Sample.png")
-            d = ImageDraw.Draw(im)
-            location = (3000, 3000)
-            font = ImageFont.truetype("/home/harsh/Certificate/04b_08/04B_08__.TTF", 250)
-            d.text(location,i,fill=9,font=font)
-            im.paste(profile,(550,700))
-            im.save("certificate_"+i+".pdf")
+        im = Image.open("/home/harsh/Certificate/Sample.png")
+        d = ImageDraw.Draw(im)
+        location = (3000, 3000)
+        font = ImageFont.truetype("/home/harsh/Certificate/04b_08/04B_08__.TTF", 250)
+        d.text(location,user_name,fill=9,font=font)
+        im.paste(profile,(550,700))
+        im.save("certificate_"+user_name+".pdf")
+        return Response({"Message":"Certificate Created Successfully."})
 
