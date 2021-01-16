@@ -75,8 +75,8 @@ class Login(GenericAPIView):
             
         }
         if user_details:
-            return Response({'Data':response.json(),'User':user_details,"Message":"login successfull."},status=200)
-        return Response({'Message':"Incorrect credentials."},status=404)
+            return Response({'Data':response.json(),'User':user_details,"Message":"login successfull.","Status":200})
+        return Response({'Message':"Incorrect credentials.","Status":404})
 
 
 
