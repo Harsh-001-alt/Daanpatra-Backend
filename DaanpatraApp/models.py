@@ -12,18 +12,18 @@ ROLE_CHOICES = (
 
 CATEGORY = (
     ("clothes", "Clothes"),
-    ("food", "Food"),
-    ("fund", "Fund"),
+    ("food", "Raw Food"),
+    # ("fund", "Fund"),
     ("utensils", "Utensils"),
     ("equipments", "Equipments"),
     ("books", "Books"),
+    ("medicines", "Un-Expired Medicines"),
     ("other", "Other"),
 )
 
 class User(AbstractUser):
     profile = models.ImageField(upload_to='Profile Pictures', blank=True, null=True)
     uuid = models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False)
-    name = models.CharField(max_length=30, blank=True)
     email = models.CharField(max_length=30, blank=True)
     password = models.CharField(max_length=150, blank=True)
     birth_date = models.DateField(null=True, blank=True)
@@ -40,7 +40,14 @@ class User(AbstractUser):
             ("can_add_location", "Access to add location"),
             ("can_remove_location", "Access to remove location"),
             ("can_update_location", "Access to update location"), 
+            ("can_update_donation_status", "Access to update Donation Status"),
+            ("can_get_donation_gallery_images", "Access to get Donation Gallery Images"),
+            ("can_add_donation_gallery_images", "Access to Add Donation Gallery Images"),
+            ("can_remove_donation_gallery_images", "Access to Delete Donation Gallery Images"), 
         )
+
+    # def __str__(self):
+    #     return self.first_name
 
 class Donation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='User', blank=True, null=True)
@@ -52,10 +59,16 @@ class Donation(models.Model):
     pickup_date = models.DateField()
     assign_to_sub_admin = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Assigned_to_Sub_Admin', blank=True, null=True)
     assign_to_driver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='Assigned_to_drivers', blank=True, null=True)
+    donation_status = models.BooleanField(default=False,help_text = "Check when delivery gets successful.")
 
 class ProductImages(models.Model):
     donation = models.ForeignKey(Donation, on_delete=models.CASCADE, related_name='Product_Images', blank=True, null=True)
-    images = models.CharField(max_length=200, blank=True, null=True)
+    images = models.ImageField(upload_to='Donation Product Image', blank=True, null=True)
+
+
+class DonationGallery(models.Model):
+    images = models.ImageField(upload_to='Donation Gallery', blank=True, null=True)
+
 
 # class FundDonation(models.Model):
 #     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)

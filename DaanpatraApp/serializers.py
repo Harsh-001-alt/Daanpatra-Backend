@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from rest_framework.response import Response
 from django.conf import settings
-
+#===========================================================================
 class FilteredUserSerializer(serializers.ListSerializer):
 
     def to_representation(self, data):
@@ -21,7 +21,8 @@ class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True)
     email = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
-    name = serializers.CharField(required=True)
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
     birth_date = serializers.CharField(required=True)
 
     class Meta:
@@ -38,7 +39,8 @@ class UserSerializer(serializers.ModelSerializer):
                     email = validated_data.get('email'),
                     username = validated_data.get('username'),
                     password = validated_data.get('password'),
-                    name = validated_data.get('name'),
+                    first_name = validated_data.get('first_name'),
+                    last_name = validated_data.get('last_name'),
                     birth_date = validated_data.get('birth_date'),
                     role=role
                 )
@@ -52,7 +54,8 @@ class UserSerializer(serializers.ModelSerializer):
                 email = validated_data.get('email'),
                 username = validated_data.get('username'),
                 password = validated_data.get('password'),
-                name = validated_data.get('name'),
+                first_name = validated_data.get('first_name'),
+                last_name = validated_data.get('last_name'),
                 birth_date = validated_data.get('birth_date'),
             )
             user.set_password(validated_data.get('password'))
@@ -78,13 +81,12 @@ class UserSerializer(serializers.ModelSerializer):
         # else:
         #     raise PermissionDenied()
 
+#===========================================================================
 
 class LoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
-
-
 
 class DriverActionsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -141,20 +143,27 @@ class ProductImagesSerializer(serializers.ModelSerializer):
         model = ProductImages
         fields = '__all__'
 
+#==============================================================================
+
+class DonationAccessSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        if self.context['request'].user.role == "Super_Admin":            
+            data = Donation.objects.all()
+            return super(DonationAccessSerializer, self).to_representation(data)
+        else:
+            raise serializers.ValidationError({"Message":"You're not authorized to view this page."})
 
 class DonationSerializer(serializers.ModelSerializer):
-    Product_Images = ProductImagesSerializer(many=True)
+    Product_Images = serializers.SerializerMethodField()
     class Meta:
+        list_serializer_class = DonationAccessSerializer
         model = Donation
         fields = '__all__'
+
+    def get_Product_Images(self, obj):
+        return ProductImagesSerializer(ProductImages.objects.filter(donation=obj),many=True).data
     
-    def create(self, validated_data):
-        user = self.context['request'].user
-        product_images = validated_data.pop('Product_Images')
-        obj = Donation.objects.create(user=user, **validated_data)
-        for x in product_images:
-            ProductImages.objects.create(donation=obj, **x)
-        return obj
+#==============================================================================
 
 # class FundDonationSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -165,7 +174,7 @@ class DonationSerializer(serializers.ModelSerializer):
 class FilteredDonationSerializer(serializers.ListSerializer):
 
     def to_representation(self, data):
-        data = Donation.objects.filter(assign_to=self.context['request'].user.uuid)
+        data = Donation.objects.filter(assign_to_sub_admin=self.context['request'].user.uuid)
         return super(FilteredDonationSerializer, self).to_representation(data)
 
 
@@ -175,9 +184,70 @@ class DonationActionsSerializer(serializers.ModelSerializer):
         list_serializer_class = FilteredDonationSerializer
         model = Donation
         fields = '__all__'
+
+    def update(self, instance, validated_data):
+        if self.context['request'].user.has_perm('DaanpatraApp.can_update_donation_status'):
+            if self.context['request'].user.role == "Sub_Admin":
+                data = Donation.objects.get(id=instance.id)
+                if data.assign_to_sub_admin == self.context['request'].user:
+                    instance.donation_status = validated_data.get('donation_status', instance.donation_status)
+                    instance.save()
+                    return instance
+                else:
+                    raise PermissionDenied
+            else:
+                instance.donation_status = validated_data.get('donation_status', instance.donation_status)
+                instance.save()
+                return instance
+        else:
+            raise PermissionDenied
+
 #================================================================================
+
+#-----------------------------TESTING PURPOSE-------------------------------
+
+class CertificateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Donation
+        fields = '__all__'
+
+class TranslateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Donation
+        fields = '__all__'
+
+class YouTubeVideoLinksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Donation
+        fields = '__all__'
+
+class GoogleLoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Donation
+        fields = '__all__'
+
+#=============================================================================
+class DonationGalleryViewSerializer(serializers.ListSerializer):
+
+    def to_representation(self, data):
+        if self.context['request'].user.has_perm('DaanpatraApp.can_get_donation_gallery_images'):
+            data = DonationGallery.objects.all()
+            return super(DonationGalleryViewSerializer, self).to_representation(data)
+        else:
+            raise PermissionDenied()
+
+class DonationGallerySerializer(serializers.ModelSerializer):
+    class Meta:
+        list_serializer_class = DonationGalleryViewSerializer
+        model = DonationGallery
+        fields = '__all__'
+
+#=============================================================================
 
 class TestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Donation
         fields = '__all__'
+
+
+#-----------------------------TESTING PURPOSE-------------------------------

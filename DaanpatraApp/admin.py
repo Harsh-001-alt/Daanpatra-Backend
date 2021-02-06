@@ -5,4 +5,5 @@ from . models import *
 admin.site.register(User)
 admin.site.register(Donation)
 admin.site.register(ProductImages)
+admin.site.register(DonationGallery)
 # admin.site.register(FundDonation)

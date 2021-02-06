@@ -41,19 +41,32 @@ INSTALLED_APPS = [
     'rest_framework',
     'DaanpatraApp',
     'oauth2_provider',
+    'social_django',
+    'rest_framework_social_oauth2',
+    'instagram_profile'
 ]
 
 REST_FRAMEWORK = { 
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication', 
+        'rest_framework_social_oauth2.authentication.SocialAuthentication'
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ] 
 } 
 
+INSTAGRAM_PROFILE = {
+    # You will get these from your registered instagram app
+    'app_id': '3622581841130142',
+    'secret': 'f778c490c996896089e88400848385e3',
+    'redirect_url': 'http://127.0.0.1:8000/',        
+}
+
 
 AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'rest_framework_social_oauth2.backends.DjangoOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -71,6 +84,16 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'Daanpatra.urls'
 
 
+OAUTH2_PROVIDER = {
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,
+}
+
+
+FCM_DJANGO_SETTINGS = {
+    "FCM_SERVER_KEY": "AAAANSv3sDw:APA91bEgoMXu74uPlgqSDlPMLhew0KceqnnLwqfPglk2uZ_PNd01EDbZ3TLx8cGP11lmbgqV3Vii3DIlH_fhTMhzcUdMUzOQjWcYowtOhlLVLPS3EkVHnmmXvhFAlJ8AOjNIfCIjZd"
+}
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -82,6 +105,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect'
             ],
         },
     },
@@ -125,7 +150,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
@@ -144,10 +169,15 @@ AUTH_USER_MODEL = 'DaanpatraApp.User'
 CLIENT_ID = '04DpVJlIWfxGAMsNwMqJzkBpG654VpzCbnEz1meb'
 CLIENT_SECRET = 'XniDVIbxp8Ij1bI9tWiC9TE1AsdU3E40vbPLDP1xDfbXup5cE2lLPKJalbXs50yKMuPbqZMUubAAqyPXyVhxPyb44rFSASvgpy0p8uBC8OTzyM9o0fvdpt50uSWoQlVe'
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '271276515194-3m9mm5j76g89cb030tj3j4tb99ggu2e9.apps.googleusercontent.com'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '4ov541ls1RE3FLpI6V6sa23B'
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '1075097280260-go5b9dkfprc6pc13ael7kdjs11i6ut2i.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '3uZF2mn0LqHlwW3c2RI09Vq9'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STRIPE_API_KEY = 'sk_test_51I99M9LRgnbH7KkbI3cQmnKYU22ReiPYOfWl7mpePqNcm00it3kAnfVfsgEJKw09Fn4THcuuzUWVPaMHRMarYE2Z008tAkQILh'
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+]

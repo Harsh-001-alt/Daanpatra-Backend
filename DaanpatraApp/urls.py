@@ -11,11 +11,18 @@ router.register(r"user-actions", view.UserActionsViewset, "user_actions")
 router.register(r"donation", view.DonationViewSet, "donation")
 # router.register(r"fund-donation", view.FundDonationViewSet, "fund_donation")
 router.register(r"donation-actions", view.DonationActionsViewSet, "donation_actions")
+router.register(r"certificate", view.CertificateViewSet, "certificate")
+router.register(r"youtube-video", view.YouTubeVideoLinksViewSet, "youtube-video")
+router.register(r"translate", view.TranslateViewSet, "translate")
+router.register(r"google-login", view.GoogleLoginViewSet, "google-login")
+router.register(r"donation-gallery", view.DonationGalleryViewSet, "donation-gallery")
 router.register(r"test", view.TestViewSet, "test")
+
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
     path('login/', view.Login.as_view(), name='login'),
+    path('logout/',view.LogoutAPI.as_view(),name='logout')
 ] 
