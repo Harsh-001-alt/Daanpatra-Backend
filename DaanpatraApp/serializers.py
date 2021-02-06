@@ -23,7 +23,6 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(required=True)
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
-    birth_date = serializers.CharField(required=True)
 
     class Meta:
         list_serializer_class = FilteredUserSerializer     
@@ -41,7 +40,6 @@ class UserSerializer(serializers.ModelSerializer):
                     password = validated_data.get('password'),
                     first_name = validated_data.get('first_name'),
                     last_name = validated_data.get('last_name'),
-                    birth_date = validated_data.get('birth_date'),
                     role=role
                 )
                 user.set_password(validated_data.get('password'))
@@ -56,7 +54,6 @@ class UserSerializer(serializers.ModelSerializer):
                 password = validated_data.get('password'),
                 first_name = validated_data.get('first_name'),
                 last_name = validated_data.get('last_name'),
-                birth_date = validated_data.get('birth_date'),
             )
             user.set_password(validated_data.get('password'))
             user.save()
@@ -243,6 +240,29 @@ class DonationGallerySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 #=============================================================================
+
+class UserAppSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+    def create(self,validated_data):
+        user = User.objects.create(
+            contact = validated_data.get('contact'),
+            username = validated_data.get('contact'),
+            # password = validated_data.get('password'),
+            first_name = validated_data.get('first_name'),
+            last_name = validated_data.get('last_name'),
+        )
+        # user.set_password(validated_data.get('password'))
+        user.save()
+        return user
+
+class UserAppLoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
+
 
 class TestSerializer(serializers.ModelSerializer):
     class Meta:

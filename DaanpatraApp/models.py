@@ -28,6 +28,8 @@ class User(AbstractUser):
     password = models.CharField(max_length=150, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     role = models.CharField(max_length = 30,choices = ROLE_CHOICES, default='user')
+    otp = models.CharField(max_length = 30,null=True, blank=True)
+    contact = models.CharField(max_length = 30,null=True, blank=True)
 
     class Meta:
         permissions = ( 

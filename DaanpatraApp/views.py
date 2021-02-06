@@ -347,6 +347,57 @@ class DonationGalleryViewSet(viewsets.ModelViewSet):
         else:
             raise PermissionDenied()
 
+class UserAppLogin(GenericAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = UserAppLoginSerializer
+    def post(self, request):
+        response = requests.post("http://127.0.0.1:8000/o/token/", 
+        data={
+            'username':request.data.get('username'),
+            'password':request.data.get('password'),
+            'grant_type':'password',
+            'client_id':settings.CLIENT_ID,
+            'client_secret':settings.CLIENT_SECRET,
+            'scope':'read'
+
+        }
+        
+        )
+        json_data = json.loads(response.text)
+        token = json_data.get('access_token')
+        token_data = AccessToken.objects.get(token=token)
+        user = User.objects.get(uuid=token_data.user.uuid)
+        
+        user_details = {
+            'Username':user.username,
+            'Name':user.first_name + " " + user.last_name,
+            'Email':user.email,
+            'Birth Date':user.birth_date,
+            'Role':user.role,
+            'Permissions':user.get_all_permissions(),
+            
+        }
+        if user_details:
+            return Response({'Data':response.json(),'User':user_details,"Message":"login successfull.","Status":200})
+        return Response({'Message':"Incorrect credentials.","Status":404})
+
+
+class OTP(GenericAPIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        user = User.objects.get(username=request.data.get('username'))
+        import random
+        otp = random.randint(111111, 999999)
+        print(otp)
+        user.set_password(str(otp))
+        user.save()
+        return Response({"Message":"OTP Sent"})
+
+
+class UserAppViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
+    queryset = User.objects.all()
+    serializer_class = UserAppSerializer
 
 
 class TestViewSet(viewsets.ModelViewSet):
@@ -373,4 +424,6 @@ class TestViewSet(viewsets.ModelViewSet):
         # profile = instaloader.Profile.from_username(bot.context, 'poojatailor290')
         # posts = profile.get_posts()
         # # bot.download_profile('poojatailor290')
+
+
 #-----------------------------TESTING PURPOSE-------------------------------
